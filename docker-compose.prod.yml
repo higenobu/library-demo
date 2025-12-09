@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dash_demo
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/dash_demo"
+      FLASK_SECRET: "${FLASK_SECRET:-change-me-in-production}"
+      FLASK_ENV: "production"
+    restart: unless-stopped
+    # NOTE: web does NOT publish ports to the host. nginx will proxy to it.
+    networks:
+      - internal_net
+
+  nginx:
+    image: nginx:1.26-alpine
+    depends_on:
+      - web
+    ports:
+      - "80:80"    # HTTP -> redirect to HTTPS
+      - "443:443"  # HTTPS
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/certs:/etc/nginx/certs:ro
+    restart: unless-stopped
+    networks:
+      - internal_net
+      - proxy_net
+
+volumes:
+  db_data:
+
+networks:
+  internal_net:
+    driver: bridge
+  proxy_net:
+    driver: bridge

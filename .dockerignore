@@ -1,0 +1,5 @@
+dash
+flask
+psycopg2-binary
+Werkzeug
+# add any other libraries your app needs, e.g. pandas, sqlalchemy, etc.
