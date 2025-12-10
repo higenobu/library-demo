@@ -15,7 +15,7 @@
 - production 用には FLASK_SECRET を安全な値にして、volumes のマウントを外し、機密情報は環境変数/シークレットで管理してください。
 
 もし既存の DB に対して rent_date のデフォルトを付与したい場合（すでにデータがある場合）、以下を手動で実行してください（ホストから psql 実行）:
-  docker compose exec -T db psql -U postgres -d dash_demo -c "ALTER TABLE rent ALTER COLUMN rent_date SET DEFAULT CURRENT_DATE;"
+  docker compose exec -T db psql -U matsuo -d emr_sample -c "ALTER TABLE rent ALTER COLUMN rent_date SET DEFAULT CURRENT_DATE;"
 
 バックアップを忘れずに。
 ```
