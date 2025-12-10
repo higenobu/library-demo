@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dash_demo
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      # 初回起動時に実行する SQL をここに入れておく（初回のみ適用）
+      - ./docker/db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8050:8050"
+    environment:
+      # アプリ側で DATABASE_URL を参照している場合は以下を利用
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/dash_demo"
+      FLASK_SECRET: "change-me-in-production"
+      # 追加の環境変数を必要に応じて設定してください
+    volumes:
+      - ./:/app:cached   # 開発向け。不要なら外す（productionではコピー済みイメージを利用）
+    command: /bin/sh -c "/wait-for-it.sh db:5432 --timeout=60 --strict -- python lib-final-v5-search-full-fixed.py --run"
+
+volumes:
+  db_data:
