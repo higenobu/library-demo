@@ -1,3 +1,4 @@
+
 services:
   db:
     image: postgres:15
@@ -19,11 +20,14 @@ services:
       db:
         condition: service_healthy
     environment:
+      # Web コンテナに正しい DB 接続文字列を渡す（ホスト名は db）
       DATABASE_URL: "postgresql://matsuo:masanobu@db:5432/emr_sample"
+      # もし app.py が別の変数名を使っているならそれも追加可能
+      # DB_HOST: db
+      # DB_PORT: "5432"
     ports:
       - "8050:8050"
-    volumes:
-      - ./:/app                # mount project into container so edits on host are reflected
+    # volumes:  # 開発時にホストマウントする場合はホスト側に app.py/run.sh を置くこと
     restart: unless-stopped
 
 volumes:

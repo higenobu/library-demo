@@ -30,7 +30,7 @@ from dash.dependencies import Input, Output, State
 # -----------------------------------------------------------------------------
 # Config
 # -----------------------------------------------------------------------------
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://library_user:library_pass@localhost:5432/library_db")
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://matsuo:masanobu@localhost:5432/emr_sample")
 SECRET_KEY = os.environ.get("FLASK_SECRET", "dev-secret-change-me")
 
 # -----------------------------------------------------------------------------
@@ -48,6 +48,7 @@ login_manager.login_view = "/login"
 # DB helpers
 # -----------------------------------------------------------------------------
 def get_db_conn():
+    print (DATABASE_URL)
     return psycopg2.connect(DATABASE_URL)
 
 def ensure_tables():
